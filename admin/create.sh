@@ -10,6 +10,7 @@ aws ec2 delete-key-pair --key-name ${kname}
 
 # Create and save EC2 key pair
 aws ec2 create-key-pair --key-name ${kname} --output text | sed 's/.*BEGIN.*-$/-----BEGIN RSA PRIVATE KEY-----/' | sed "s/.*${kname}$/-----END RSA PRIVATE KEY-----/" > ${kname}.pem
+chmod 600 ${kname}.pem
 
 # Delete old stack
 aws cloudformation delete-stack --stack-name BTR-standard
