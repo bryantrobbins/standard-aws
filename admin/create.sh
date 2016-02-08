@@ -12,7 +12,7 @@ aws ec2 delete-key-pair --key-name ${kname}
 aws ec2 create-key-pair --key-name ${kname} --output text | sed 's/.*BEGIN.*-$/-----BEGIN RSA PRIVATE KEY-----/' | sed "s/.*${kname}$/-----END RSA PRIVATE KEY-----/" > ${kname}.pem
 
 # Delete old stack
-aws cloudformation delete-stack --stack-name baseball-BuildHost
+aws cloudformation delete-stack --stack-name BTR-standard
 
 # Create stack
-aws cloudformation create-stack --stack-name baseball-BuildHost --template-body file:///${tfile} --parameters ParameterKey=KeyName,ParameterValue=${kname}
+aws cloudformation create-stack --stack-name BTR-standard --template-body file:///${tfile} --parameters ParameterKey=KeyName,ParameterValue=${kname}
