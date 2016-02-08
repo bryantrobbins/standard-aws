@@ -361,7 +361,7 @@
             },
             "commands" : {
               "1_update" : {
-                "command" : "yum update", 
+                "command" : "yum update -y", 
                 "cwd" : "/root/bootstrap"
               },
               "2_r10k" : {
