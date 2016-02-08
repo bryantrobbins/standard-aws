@@ -394,7 +394,7 @@
           "yum update -y aws-cfn-bootstrap\n",
           "/opt/aws/bin/cfn-init ",
           " --stack ", { "Ref" : "AWS::StackName" },
-          " --resource MyInstance ",
+          " --resource BuildServer ",
           " --region ", { "Ref" : "AWS::Region" }, "\n"
         ]]}}
       }
