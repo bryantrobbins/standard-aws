@@ -369,7 +369,7 @@
                 "cwd" : "/root/bootstrap/instances/build"
               },
               "3_puppet" : {
-                "command" : "puppet apply -l /var/log/puppet site.pp", 
+                "command" : "puppet apply -l /var/log/puppet/site.log site.pp", 
                 "cwd" : "/root/bootstrap/instances/build"
               }
             }
