@@ -356,37 +356,23 @@
                 "r10k" : [ ]
               }
             },
-            "files" : {
-              "/root/site.pp": {
-                "source": "https://raw.githubusercontent.com/bryantrobbins/standard-aws/master/instances/builds/site.pp",
-                "mode": "000600",
-                "owner": "root",
-                "group": "root",
-              },
-              "/root/Puppetfile": {
-                "source": "https://raw.githubusercontent.com/bryantrobbins/standard-aws/master/instances/builds/Puppetfile",
-                "mode": "000600",
-                "owner": "root",
-                "group": "root",
-              }
+            "sources" : {
+              "/root/bootstrap" : "https://github.com/bryantrobbins/standard-aws/tarball/master"
             },
             "commands" : {
-              "test" : {
-                "command" : "
-                "env" : { "MAGIC" : "I come from the environment!" },
-                "cwd" : "~",
-                "test" : "test ! -e ~/test.txt",
-                "ignoreErrors" : "false"
+              "1_update" : {
+                "command" : "yum update", 
+                "cwd" : "/root/bootstrap"
+              },
+              "2_r10k" : {
+                "command" : "r10k puppetfile install -v", 
+                "cwd" : "/root/bootstrap/instances/build"
+              },
+              "3_puppet" : {
+                "command" : "puppet apply site.pp", 
+                "cwd" : "/root/bootstrap/instances/build"
               }
             }
-          }
-        },
-        "AWS::CloudFormation::Authentication": {
-          "GithubCredentials": {
-            "type": "basic",
-            "username": { "Ref": "GithubLogin" },
-            "password": { "Ref": "GithubPassword" },
-            "uris": ["github.com"]
           }
         }
       },
@@ -404,27 +390,28 @@
           "SubnetId"                 : { "Ref" : "Subnet" }
         }],
         "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
-             "#!/bin/bash -xe\n",
-             "yum update -y\n",
-             "yum install -y  git\n",
-             "git clone https://github.com/bryantrobbins/baseball\n",
-             "mv baseball/infra/puppet .\n",
-             "rm -rf baseball\n",
-             "./puppet/init.sh &> /var/log/init.log\n"
-        ]]}}
+          "#!/bin/bash -xe\n",
+          "yum update -y aws-cfn-bootstrap\n",
+
+          "# Install the files and packages from the metadata\n",
+          "/opt/aws/bin/cfn-init -v ",
+          "         --stack ", { "Ref" : "AWS::StackName" },
+          "         --resource BuildServer",
+          "         --region ", { "Ref" : "AWS::Region" }, "\n"
+    ]]}}
       },
       "CreationPolicy" : {
         "ResourceSignal" : {
-          "Timeout" : "PT15M"
+          "Timeout" : "PT20M"
         }
       }
-    },
+    }
   },
 
   "Outputs" : {
     "URL" : {
-      "Value" : { "Fn::Join" : [ "", ["http://", { "Fn::GetAtt" : ["WebServerInstance", "PublicIp"] }]]},
-      "Description" : "Newly created application URL"
+      "Value" : { "Fn::Join" : [ "", ["http://", { "Fn::GetAtt" : ["BuildServer", "PublicIp"] }, ":8080"]]},
+      "Description" : "Jenkins URL"
     }
   }
 }

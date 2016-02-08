@@ -4,6 +4,8 @@ mod 'puppetlabs/stdlib'
 mod 'nanliu/staging'
 mod 'camptocamp/archive'
 mod 'maestrodev/ssh_keygen'
+mod 'counsyl/packer'
+mod 'garethr/docker'
 
 # NOTE: The Puppetlabs java module doesn't work with amazon linux (wtf), so we have to add a fork below
 #mod 'puppetlabs/java'
