@@ -11,12 +11,12 @@ gem install r10k
 
 echo "Running r10k"
 pushd /root/bootstrap/instances/build
-r10k puppetfile install -v debug2 &> /var/log/puppet/r10k.log
+/usr/local/bin/r10k puppetfile install -v debug2 &> /var/log/puppet/r10k.log
 popd
 
 echo "Running Puppet"
 pushd /root/bootstrap/instances/build
-puppet apply -l /var/log/puppet/site.log site.pp
+/usr/bin/puppet apply -l /var/log/puppet/site.log site.pp
 popd
 
 echo "Done with INIT."
