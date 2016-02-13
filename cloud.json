@@ -352,7 +352,7 @@
             },
             "commands" : {
               "init-script" : {
-                "command" : "bash init.sh", 
+                "command" : "bash -x init.sh | tee /var/log/init.log", 
                 "cwd" : "/root/bootstrap"
               }
             }
