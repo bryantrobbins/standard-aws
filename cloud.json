@@ -354,7 +354,7 @@
               "init-script" : {
                 "command" : "bash init.sh", 
                 "cwd" : "/root/bootstrap"
-              },
+              }
             }
           }
         }
