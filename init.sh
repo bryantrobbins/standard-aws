@@ -11,7 +11,7 @@ gem install r10k
 
 echo "Running r10k"
 pushd /root/bootstrap/instances/build
-r10k puppetfile install -v | tee /var/log/puppet/r10k.log
+r10k puppetfile install -v DEBUG | tee /var/log/puppet/r10k.log
 popd
 
 echo "Running Puppet"
