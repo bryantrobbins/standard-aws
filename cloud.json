@@ -347,31 +347,14 @@
         "Comment" : "Install a simple application",
         "AWS::CloudFormation::Init" : {
           "config" : {
-            "packages" : {
-              "yum" : {
-                "puppet3" : [],
-                "git" : []
-              },
-              "rubygems" : {
-                "r10k" : [ ]
-              }
-            },
             "sources" : {
               "/root/bootstrap" : "https://github.com/bryantrobbins/standard-aws/tarball/master"
             },
             "commands" : {
-              "1_update" : {
-                "command" : "yum update -y", 
+              "init-script" : {
+                "command" : "bash init.sh", 
                 "cwd" : "/root/bootstrap"
               },
-              "2_r10k" : {
-                "command" : "r10k puppetfile install -v", 
-                "cwd" : "/root/bootstrap/instances/build"
-              },
-              "3_puppet" : {
-                "command" : "puppet apply -l /var/log/puppet/site.log site.pp", 
-                "cwd" : "/root/bootstrap/instances/build"
-              }
             }
           }
         }
