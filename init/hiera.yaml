@@ -5,5 +5,5 @@
   :datadir: "/root/init/hieradata"
 :hierarchy:
   - custom
-  - "hosts/%{::ec2_cloudformation_logical_name}"
+  - "hosts/%{::ec2_cloudformation_logical_id}"
   - common
