@@ -156,8 +156,8 @@
       "hs1.8xlarge" : { "Arch" : "NATHVM64"  },
       "cr1.8xlarge" : { "Arch" : "NATHVM64"  },
       "cc2.8xlarge" : { "Arch" : "NATHVM64"  }
-    }
-,
+    },
+
     "AWSRegionArch2AMI" : {
       "us-east-1"        : {"PV64" : "ami-5fb8c835", "HVM64" : "ami-60b6c60a", "HVMG2" : "ami-e998ea83"},
       "us-west-2"        : {"PV64" : "ami-d93622b8", "HVM64" : "ami-f0091d91", "HVMG2" : "ami-315f4850"},
@@ -328,6 +328,34 @@
       }
     },
 
+    "RootRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version" : "2012-10-17",
+          "Statement": [ {
+            "Effect": "Allow",
+            "Principal": {
+              "Service": [ "ec2.amazonaws.com" ]
+            },
+            "Action": [ "sts:AssumeRole" ]
+          } ]
+        },
+        "Path": "/",
+        "ManagedPolicyArns": [ "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess", "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess" ]
+      }
+    },
+
+    "RootInstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Path": "/",
+        "Roles": [ {
+          "Ref": "RootRole"
+        } ]
+      }
+    },
+
     "InstanceSecurityGroup" : {
       "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {
@@ -347,10 +375,13 @@
         "Comment" : "Install a simple application",
         "AWS::CloudFormation::Init" : {
           "config" : {
+            "sources" : {
+              "/root/init" : "https://github.com/bryantrobbins/standard-aws-init/tarball/master"
+            },
             "commands" : {
               "init-script" : {
                 "command" : "bash -x init.sh build &> /var/log/init.log", 
-                "cwd" : "/root/bootstrap"
+                "cwd" : "/root/init"
               }
             }
           }
@@ -361,7 +392,10 @@
                           { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "InstanceType" }, "Arch" ] } ] },
         "InstanceType" : { "Ref" : "InstanceType" },
         "KeyName" : { "Ref" : "KeyName" },
-        "Tags" : [ {"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} } ],
+        "Tags" : [ {"Key" : "Staging", "Value" : ""} ],
+        "IamInstanceProfile": {
+          "Ref": "RootInstanceProfile"
+        },
         "NetworkInterfaces" : [{
           "GroupSet"                 : [{ "Ref" : "InstanceSecurityGroup" }],
           "AssociatePublicIpAddress" : "true",

@@ -13,4 +13,4 @@ aws ec2 create-key-pair --key-name ${kname} --output text | sed 's/.*BEGIN.*-$/-
 chmod 600 ${kname}.pem
 
 # Create stack
-aws cloudformation create-stack --stack-name BTR-standard --template-body file:///${tfile} --parameters ParameterKey=KeyName,ParameterValue=${kname}
+aws cloudformation create-stack --stack-name BTR-standard --template-body file:///${tfile} --parameters ParameterKey=KeyName,ParameterValue=${kname} --capabilities CAPABILITY_IAM
