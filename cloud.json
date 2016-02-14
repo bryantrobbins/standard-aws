@@ -328,6 +328,10 @@
       }
     },
 
+    "StagingBucket": {
+      "Type" : "AWS::S3::Bucket"
+    },
+
     "RootRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
@@ -372,11 +376,17 @@
       "Type" : "AWS::EC2::Instance",
       "DependsOn" : "AttachGateway",
       "Metadata" : {
-        "Comment" : "Install a simple application",
+        "AWS::CloudFormation::Authentication": {
+          "AccessCreds": {
+            "type": "S3",
+            "roleName": { "Ref" : "RootRole" },
+            "buckets" : [ { "Ref" : "StagingBucket"} ]
+          }
+        },
         "AWS::CloudFormation::Init" : {
           "config" : {
             "sources" : {
-              "/root/init" : "https://github.com/bryantrobbins/standard-aws-init/tarball/master"
+              "/root" : "https://github.com/bryantrobbins/standard-aws/tarball/master"
             },
             "commands" : {
               "init-script" : {
@@ -419,6 +429,10 @@
     "URL" : {
       "Value" : { "Fn::Join" : [ "", ["http://", { "Fn::GetAtt" : ["BuildServer", "PublicIp"] }, ":8080"]]},
       "Description" : "Jenkins URL"
+    },
+    "SSHCommand" : {
+      "Value" : { "Fn::Join" : [ "", ["ssh -i builder.pem", " ec2-user@", { "Fn::GetAtt" : ["BuildServer", "PublicIp"] }]]},
+      "Description" : "Use this to SSH"
     }
   }
 }
