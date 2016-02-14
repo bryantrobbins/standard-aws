@@ -1,5 +1,10 @@
 #!/bin/bash -v
 
+host=$1
+hostdir="/root/bootstrap/hosts/${host}"
+
+echo "Installing on host ${host}"
+
 echo "Updating packages"
 yum update -y
 
@@ -10,12 +15,12 @@ echo "Installing r10k"
 gem install r10k
 
 echo "Running r10k"
-pushd /root/bootstrap/instances/build
+pushd ${hostdir}
 /usr/local/bin/r10k puppetfile install -v debug2 &> /var/log/puppet/r10k.log
 popd
 
 echo "Running Puppet"
-pushd /root/bootstrap/instances/build
+pushd ${hostdir}
 /usr/bin/puppet apply -l /var/log/puppet/site.log site.pp
 popd
 
