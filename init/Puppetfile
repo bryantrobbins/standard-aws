@@ -17,3 +17,6 @@ mod 'java',
 # My modules
 mod 'superbuilds',
   :git => 'https://github.com/bryantrobbins/puppet-superbuilds'
+
+mod 'aws_ec2_facts',
+  :git => 'https://github.com/bryantrobbins/puppet-aws_ec2_facts'
