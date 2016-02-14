@@ -431,7 +431,7 @@
       "Description" : "Jenkins URL"
     },
     "SSHCommand" : {
-      "Value" : { "Fn::Join" : [ "", ["ssh -i builder.pem", " ec2-user@", { "Fn::GetAtt" : ["BuildServer", "PublicIp"] }]]},
+      "Value" : { "Fn::Join" : [ "", ["ssh -i ~/keys/builder.pem", " ec2-user@", { "Fn::GetAtt" : ["BuildServer", "PublicIp"] }]]},
       "Description" : "Use this to SSH"
     }
   }

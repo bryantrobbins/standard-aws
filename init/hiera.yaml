@@ -2,7 +2,7 @@
 :backends:
   - yaml
 :yaml:
-  :datadir: "/root/init/hieradata"
+  :datadir: "/root/init/datadir"
 :hierarchy:
   - custom
   - "hosts/%{::aws_cloudformation_logical_id}"
