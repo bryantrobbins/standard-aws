@@ -15,7 +15,7 @@ mod 'java',
   :git => 'https://github.com/sladd0175/puppetlabs-java'
 
 # The packer module is broken, due to changed URLs on Hashicorp's site. This fork has a fix.
-mod 'packer'
+mod 'packer',
  :git => 'https://github.com/jniesen/puppet-packer-1'
 
 # My modules
