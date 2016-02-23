@@ -9,6 +9,6 @@ yum install -y rubygems git puppet3
 echo "Installing rubygems"
 gem install r10k hiera-eyaml hiera-eyaml-kms
 
-./update.sh
+bash /root/init/update.sh
 
 echo "Done with INIT."
