@@ -12,6 +12,10 @@ fi
 in=`sed '2q;d' ${cfile}`
 IFS=',' read -ra ADDR <<< "${in}"
 
+# Clean some stuff up
+rm -rf ~/.aws
+mkdir ~/.aws
+
 # Write credentials file
 user=${ADDR[0]}
 akey=${ADDR[1]}

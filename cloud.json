@@ -1,7 +1,7 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
 
-  "Description" : "AWS CloudFormation Sample Template VPC_Single_Instance_In_Subnet: Sample template showing how to create a VPC and add an EC2 instance with a security group. **WARNING** This template creates an Amazon EC2 instance. You will be billed for the AWS resources used if you create a stack from this template.",
+  "Description" : "This is Bryan's standard template for AWS-hosted side projects. It is very opinionated about my favorite ways of doing things.",
 
   "Parameters" : {
 
@@ -18,16 +18,6 @@
       "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instance",
       "Type": "AWS::EC2::KeyPair::KeyName",
       "ConstraintDescription" : "must be the name of an existing EC2 KeyPair."
-    },
-    
-    "SSHLocation" : {
-      "Description" : " The IP address range that can be used to SSH to the EC2 instances",
-      "Type": "String",
-      "MinLength": "9",
-      "MaxLength": "18",
-      "Default": "0.0.0.0/0",
-      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
-      "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x."
     }
   },
 
@@ -156,6 +146,17 @@
       "hs1.8xlarge" : { "Arch" : "NATHVM64"  },
       "cr1.8xlarge" : { "Arch" : "NATHVM64"  },
       "cc2.8xlarge" : { "Arch" : "NATHVM64"  }
+    },
+
+    "AWSRegionToECSAMI" : {
+      "us-east-1"      : { "AMIID" : "ami-2b3b6041" },
+      "us-west-2"      : { "AMIID" : "ami-ac6872cd" },
+      "eu-west-1"      : { "AMIID" : "ami-03238b70" },
+      "ap-northeast-1" : { "AMIID" : "ami-fb2f1295" },
+      "ap-southeast-2" : { "AMIID" : "ami-43547120" },
+      "us-west-1"      : { "AMIID" : "ami-bfe095df" },
+      "ap-southeast-1" : { "AMIID" : "ami-c78f43a4" },
+      "eu-central-1"   : { "AMIID" : "ami-e1e6f88d" }
     },
 
     "AWSRegionArch2AMI" : {
@@ -328,11 +329,25 @@
       }
     },
 
-    "StagingBucket": {
-      "Type" : "AWS::S3::Bucket"
+    "DeployRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version" : "2012-10-17",
+          "Statement": [ {
+            "Effect": "Allow",
+            "Principal": {
+              "Service": [ "ec2.amazonaws.com" ]
+            },
+            "Action": [ "sts:AssumeRole" ]
+          } ]
+        },
+        "Path": "/",
+        "ManagedPolicyArns": [ "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess", "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess", "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser" ]
+      }
     },
 
-    "RootRole": {
+    "ContainerRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -350,39 +365,87 @@
       }
     },
 
-    "RootInstanceProfile": {
+    "DeployInstanceProfile": {
       "Type": "AWS::IAM::InstanceProfile",
       "Properties": {
         "Path": "/",
         "Roles": [ {
-          "Ref": "RootRole"
+          "Ref": "DeployRole"
         } ]
       }
     },
 
-    "InstanceSecurityGroup" : {
+    "ContainerInstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Path": "/",
+        "Roles": [ {
+          "Ref": "ContainerRole"
+        } ]
+      }
+    },
+
+    "SecurityGroupInternetSSH" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "GroupDescription" : "Enable SSH access via port 22 (from Internet) and over 22 to internal instances (jump box)",
+        "SecurityGroupIngress" : [
+          { "IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : "0.0.0.0/0"}
+         ]
+      }
+    },
+
+    "SecurityGroupInternalSSH" : {
       "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {
         "VpcId" : { "Ref" : "VPC" },
         "GroupDescription" : "Enable SSH access via port 22",
         "SecurityGroupIngress" : [
-          {"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : { "Ref" : "SSHLocation"}},
-          { "IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "CidrIp" : "0.0.0.0/0"},
-          { "IpProtocol" : "tcp", "FromPort" : "8080", "ToPort" : "8080", "CidrIp" : "0.0.0.0/0"}
+          { "IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "SourceSecurityGroupId" : { "Ref" : "SecurityGroupInternetSSH" }}
          ]
       }
     },
+
+    "JumpBoxEgressRule": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties":{
+        "IpProtocol": "tcp",
+        "FromPort": "22",
+        "ToPort": "22",
+        "DestinationSecurityGroupId": {
+          "Fn::GetAtt": [
+            "SecurityGroupInternalSSH",
+            "GroupId"
+          ]
+        },
+        "GroupId": {
+          "Fn::GetAtt": [
+            "SecurityGroupInternetSSH",
+            "GroupId"
+          ]
+        }
+      }
+    },
+
+    "SecurityGroupWebService" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "GroupDescription" : "Enable Web Services on Common Ports",
+        "SecurityGroupIngress" : [
+          { "IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "CidrIp" : "0.0.0.0/0"},
+          { "IpProtocol" : "tcp", "FromPort" : "443", "ToPort" : "443", "CidrIp" : "0.0.0.0/0"},
+          { "IpProtocol" : "tcp", "FromPort" : "8080", "ToPort" : "8080", "CidrIp" : "0.0.0.0/0"},
+          { "IpProtocol" : "tcp", "FromPort" : "8443", "ToPort" : "8443", "CidrIp" : "0.0.0.0/0"}
+         ]
+      }
+    },
+
     "BuildServer" : {
       "Type" : "AWS::EC2::Instance",
       "DependsOn" : "AttachGateway",
       "Metadata" : {
-        "AWS::CloudFormation::Authentication": {
-          "AccessCreds": {
-            "type": "S3",
-            "roleName": { "Ref" : "RootRole" },
-            "buckets" : [ { "Ref" : "StagingBucket"} ]
-          }
-        },
         "AWS::CloudFormation::Init" : {
           "config" : {
             "sources" : {
@@ -402,12 +465,11 @@
                           { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "InstanceType" }, "Arch" ] } ] },
         "InstanceType" : { "Ref" : "InstanceType" },
         "KeyName" : { "Ref" : "KeyName" },
-        "Tags" : [ {"Key" : "Staging", "Value" : ""} ],
         "IamInstanceProfile": {
-          "Ref": "RootInstanceProfile"
+          "Ref": "DeployInstanceProfile"
         },
         "NetworkInterfaces" : [{
-          "GroupSet"                 : [{ "Ref" : "InstanceSecurityGroup" }],
+          "GroupSet"                 : [{ "Ref" : "SecurityGroupInternetSSH" }, { "Ref" : "SecurityGroupWebService" }],
           "AssociatePublicIpAddress" : "true",
           "DeviceIndex"              : "0",
           "DeleteOnTermination"      : "true",
@@ -420,6 +482,98 @@
           " --stack ", { "Ref" : "AWS::StackName" },
           " --resource BuildServer ",
           " --region ", { "Ref" : "AWS::Region" }, "\n"
+        ]]}}
+      }
+    },
+    "ImageRepository": {
+      "Type": "AWS::ECR::Repository"
+    },
+    "ECSCluster": {
+      "Type": "AWS::ECS::Cluster"
+    },
+    "ECSAutoScalingGroup" : {
+      "Type" : "AWS::AutoScaling::AutoScalingGroup",
+      "Properties" : {
+        "VPCZoneIdentifier" : [{ "Ref" : "Subnet" }],
+        "LaunchConfigurationName" : { "Ref" : "ContainerInstances" },
+        "MinSize" : "1",
+        "MaxSize" : "1",
+        "DesiredCapacity" : "1"
+      },
+      "UpdatePolicy": {
+        "AutoScalingRollingUpdate": {
+          "MinInstancesInService": "1",
+          "MaxBatchSize": "1",
+          "PauseTime" : "PT15M",
+          "WaitOnResourceSignals": "true"
+        }
+      }
+    },    
+    "ContainerInstances": {
+      "Type": "AWS::AutoScaling::LaunchConfiguration",
+      "Metadata" : {
+        "AWS::CloudFormation::Init" : {
+          "config" : {
+          
+            "commands" : {
+              "01_add_instance_to_cluster" : {
+                "command" : { "Fn::Join": [ "", [ "#!/bin/bash\n", "echo ECS_CLUSTER=", { "Ref": "ECSCluster" }, " >> /etc/ecs/ecs.config" ] ] }
+              }
+            },
+            
+            "files" : {
+              "/etc/cfn/cfn-hup.conf" : {
+                "content" : { "Fn::Join" : ["", [
+                  "[main]\n",
+                  "stack=", { "Ref" : "AWS::StackId" }, "\n",
+                  "region=", { "Ref" : "AWS::Region" }, "\n"
+                ]]},
+                "mode"    : "000400",
+                "owner"   : "root",
+                "group"   : "root"
+              },
+              "/etc/cfn/hooks.d/cfn-auto-reloader.conf" : {
+                "content": { "Fn::Join" : ["", [
+                  "[cfn-auto-reloader-hook]\n",
+                  "triggers=post.update\n",
+                  "path=Resources.ContainerInstances.Metadata.AWS::CloudFormation::Init\n",
+                  "action=/opt/aws/bin/cfn-init -v ",
+                  "         --stack ", { "Ref" : "AWS::StackName" },
+                  "         --resource ContainerInstances ",
+                  "         --region ", { "Ref" : "AWS::Region" }, "\n",
+                  "runas=root\n"
+                ]]}
+              }
+            },
+
+            "services" : {
+              "sysvinit" : {
+                "cfn-hup" : { "enabled" : "true", "ensureRunning" : "true", "files" : ["/etc/cfn/cfn-hup.conf", "/etc/cfn/hooks.d/cfn-auto-reloader.conf"] }
+              }
+            }
+          }
+        }
+      },
+      "Properties": {
+        "AssociatePublicIpAddress" : "true",
+        "ImageId" : { "Fn::FindInMap" : [ "AWSRegionToECSAMI", { "Ref" : "AWS::Region" }, "AMIID" ] },
+        "InstanceType"   : { "Ref" : "InstanceType" },
+        "IamInstanceProfile": { "Ref": "ContainerInstanceProfile" },
+        "KeyName"        : { "Ref" : "KeyName" },
+        "SecurityGroups" : [{ "Ref" : "SecurityGroupInternalSSH" }, { "Ref" : "SecurityGroupWebService" }],
+        "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
+             "#!/bin/bash -xe\n",
+             "yum install -y aws-cfn-bootstrap\n",
+
+             "/opt/aws/bin/cfn-init -v ",
+             "         --stack ", { "Ref" : "AWS::StackName" },
+             "         --resource ContainerInstances ",
+             "         --region ", { "Ref" : "AWS::Region" }, "\n",
+
+             "/opt/aws/bin/cfn-signal -e $? ",
+             "         --stack ", { "Ref" : "AWS::StackName" },
+             "         --resource ECSAutoScalingGroup ",
+             "         --region ", { "Ref" : "AWS::Region" }, "\n"
         ]]}}
       }
     }
