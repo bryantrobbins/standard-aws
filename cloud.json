@@ -608,6 +608,10 @@
     "SSHCommand" : {
       "Value" : { "Fn::Join" : [ "", ["ssh -i ~/keys/builder.pem", " ec2-user@", { "Fn::GetAtt" : ["BuildServer", "PublicIp"] }]]},
       "Description" : "Use this to SSH"
+    },
+    "SCPCommand" : {
+      "Value" : { "Fn::Join" : [ "", ["scp -i ~/keys/builder.pem", "~/keys/builder.pem ec2-user@", { "Fn::GetAtt" : ["BuildServer", "PublicIp"] }, ":~" ]]},
+      "Description" : "Use this to SSH"
     }
   }
 }
