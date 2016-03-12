@@ -34,8 +34,8 @@
       "ap-southeast-2" : { "Examples" : "https://s3-ap-southeast-2.amazonaws.com/cloudformation-examples-ap-southeast-2" },
       "sa-east-1"      : { "Examples" : "https://s3-sa-east-1.amazonaws.com/cloudformation-examples-sa-east-1" },
       "cn-north-1"     : { "Examples" : "https://s3.cn-north-1.amazonaws.com.cn/cloudformation-examples-cn-north-1" }
-    }
-,
+    },
+
     "AWSInstanceType2Arch" : {
       "t1.micro"    : { "Arch" : "PV64"   },
       "t2.nano"     : { "Arch" : "HVM64"  },
@@ -157,6 +157,30 @@
       "us-west-1"      : { "AMIID" : "ami-bfe095df" },
       "ap-southeast-1" : { "AMIID" : "ami-c78f43a4" },
       "eu-central-1"   : { "AMIID" : "ami-e1e6f88d" }
+    },
+
+    "ConsulServerAmiMap": {
+      "eu-west-1": {
+        "AMI": "ami-a10897d6"
+      },
+      "us-east-1": {
+        "AMI": "ami-1ecae776"
+      },
+      "us-west-2": {
+        "AMI": "ami-e7527ed7"
+      }
+    },
+
+    "DcMap": {
+      "eu-west-1": {
+        "Value": "eu1"
+      },
+      "us-east-1": {
+        "Value": "us1"
+      },
+      "us-west-2": {
+      "Value": "us2"
+      }
     },
 
     "AWSRegionArch2AMI" : {
@@ -611,8 +635,7 @@
     },
     "SCPCommand" : {
       "Value" : { "Fn::Join" : [ "", ["scp -i ~/keys/builder.pem", "~/keys/builder.pem ec2-user@", { "Fn::GetAtt" : ["BuildServer", "PublicIp"] }, ":~" ]]},
-      "Description" : "Use this to SSH"
+      "Description" : "Use this to SCP"
     }
   }
 }
-

@@ -10,6 +10,9 @@ mod 'counsyl/packer'
 mod 'stahnma/epel'
 mod 'garethr/docker'
 mod 'puppet/nodejs'
+mod 'jfryman/nginx'
+mod 'KyleAnderson/consul'
+mod 'gini/gradle'
 
 # NOTE: The Puppetlabs java module doesn't work with amazon linux (wtf), so we have to add a fork below
 #mod 'puppetlabs/java'
