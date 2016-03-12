@@ -1,6 +1,5 @@
 class profile::buildserver {
   include superbuilds
-  include consul_template
 
   class { 'nginx': }
 
@@ -15,8 +14,13 @@ class profile::buildserver {
     }
   }
 
+  class { 'consul_template':
+    manage_user  => true,
+    manage_group => true,
+  }
+
   consul_template::watch { 'baseball':
-    template      => 'files/baseball.json.ctmpl',
+    template      => 'profile/baseball.json.ctmpl.erb',
     destination   => '/etc/nginx/conf.d/baseball.conf',
     command       => '/etc/init.d/nginx reload',
   }

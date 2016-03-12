@@ -1,5 +1,6 @@
 mod 'puppetlabs/ntp', '4.1.0'
 mod 'puppetlabs/stdlib'
+mod 'puppetlabs/concat'
 mod 'nanliu/staging'
 mod 'camptocamp/archive'
 mod 'rtyler/jenkins'
