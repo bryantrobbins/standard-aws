@@ -13,6 +13,7 @@ mod 'puppet/nodejs'
 mod 'jfryman/nginx'
 mod 'KyleAnderson/consul'
 mod 'gini/gradle'
+mod 'gdhbashton/consul_template'
 
 # NOTE: The Puppetlabs java module doesn't work with amazon linux (wtf), so we have to add a fork below
 #mod 'puppetlabs/java'
