@@ -1,12 +1,11 @@
 upstream baseball {
   least_conn;
-  {{range service "baseball"}}server {{.Address}}:{{.Port}} max_fails=3 fail_timeout=60 weight=1;
+  {{range service "baseball-ui"}}server {{.Address}}:{{.Port}} max_fails=3 fail_timeout=60 weight=1;
   {{else}}server 127.0.0.1:65535; # force a 502{{end}}
 }
 
 server {
   listen 80;
-  server_name baseball.btr3.com;
 
   location / {
     proxy_pass http://baseball;
