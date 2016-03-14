@@ -359,7 +359,7 @@
           } ]
         },
         "Path": "/",
-        "ManagedPolicyArns": [ "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess", "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess" ],
+        "ManagedPolicyArns": [ "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess", "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess", "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly" ],
         "Policies": [
           {
             "PolicyName": "ecs-instances",
