@@ -19,9 +19,9 @@ class profile::buildserver {
     manage_group => true,
   }
 
-  consul_template::watch { 'baseball':
-    template      => 'profile/baseball.json.ctmpl.erb',
-    destination   => '/etc/nginx/conf.d/baseball.conf',
+  consul_template::watch { 'baseball-ui':
+    template      => 'profile/baseball-ui.json.ctmpl.erb',
+    destination   => '/etc/nginx/conf.d/baseball-ui.conf',
     command       => '/etc/init.d/nginx reload',
   }
 }
