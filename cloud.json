@@ -18,7 +18,14 @@
       "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instance",
       "Type": "AWS::EC2::KeyPair::KeyName",
       "ConstraintDescription" : "must be the name of an existing EC2 KeyPair."
+    },
+    
+    "Hieradata": {
+      "Description" : "Base64-encoded hieradata file content for this stack",
+      "Type": "String",
+      "Default": ""
     }
+    
   },
 
   "Mappings" : {
@@ -717,6 +724,15 @@
           "config" : {
             "sources" : {
               "/root" : "https://github.com/bryantrobbins/standard-aws/tarball/master"
+            },
+            "files" : {
+              "/root/init/datadir/custom.yaml" : {
+                "content" : { "Ref": "Hieradata"},
+                "encoding": "base64",
+                "mode"  : "000644",
+                "owner" : "root",
+                "group" : "root"
+              }
             },
             "commands" : {
               "init-script" : {

@@ -12,5 +12,14 @@ aws ec2 delete-key-pair --key-name ${kname} --region us-east-1
 aws ec2 create-key-pair --key-name ${kname} --output text --region us-east-1 | sed 's/.*BEGIN.*-$/-----BEGIN RSA PRIVATE KEY-----/' | sed "s/.*${kname}$/-----END RSA PRIVATE KEY-----/" > ${kname}.pem
 chmod 600 ${kname}.pem
 
+# Load hieradata param
+hdata=`./hiera.sh custom.yaml`
+cmd="aws cloudformation create-stack --stack-name BTR-standard --template-body file:///${tfile} --capabilities CAPABILITY_IAM --region us-east-1 --parameters ParameterKey=KeyName,ParameterValue=${kname}"
+
 # Create stack
-aws cloudformation create-stack --stack-name BTR-standard --template-body file:///${tfile} --parameters ParameterKey=KeyName,ParameterValue=${kname} --capabilities CAPABILITY_IAM --region us-east-1
+if [[ -n "$hdata" ]]; then
+  cmd="${cmd} ParameterKey=Hieradata,ParameterValue=${hdata}"
+fi
+
+# Execute cmd
+eval $cmd
