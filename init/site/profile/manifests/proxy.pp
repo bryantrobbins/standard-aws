@@ -1,6 +1,6 @@
-class profile::buildserver {
-  include superbuilds
-
+class profile::proxy (
+  $backend = hiera('profile::proxy::backends')
+) {
   class { 'nginx': }
 
   class { '::consul':
@@ -19,9 +19,11 @@ class profile::buildserver {
     manage_group => true,
   }
 
-  consul_template::watch { 'baseball-ui':
-    template      => 'profile/baseball-ui.json.ctmpl.erb',
-    destination   => '/etc/nginx/conf.d/baseball-ui.conf',
-    command       => '/etc/init.d/nginx reload',
+  $backends.each |upstream| {
+    consul_template::watch { "$upstream":
+      template      => 'profile/backend.json.ctmpl.erb',
+      destination   => "/etc/nginx/conf.d/${upstream}.conf",
+      command       => '/etc/init.d/nginx reload',
+    }
   }
 }
