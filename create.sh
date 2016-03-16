@@ -18,7 +18,7 @@ cmd="aws cloudformation create-stack --stack-name BTR-standard --template-body f
 
 # Create stack
 if [[ -n "$hdata" ]]; then
-  cmd="${cmd} ParameterKey=Hieradata,ParameterValue=${hdata}"
+  cmd="${cmd} ParameterKey=Hieradata,ParameterValue=\"${hdata}\""
 fi
 
 # Execute cmd
