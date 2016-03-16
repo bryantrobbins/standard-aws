@@ -1,3 +1,3 @@
 ---
 classes:
- - 'profile::buildserver'
+ - 'role::buildserver'
