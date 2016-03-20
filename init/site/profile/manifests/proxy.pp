@@ -1,5 +1,6 @@
 class profile::proxy (
-  $backends = hiera('profile::proxy::backends')
+  $backends = hiera('profile::proxy::backends'),
+  $frontends = hiera('profile::proxy::frontends')
 ) {
   class { 'nginx': }
 
@@ -28,6 +29,22 @@ class profile::proxy (
       template_vars => {
         'service' => "$service",
         'port' => "$port",
+      },
+      destination   => "/etc/nginx/conf.d/${service}.conf",
+      command       => '/etc/init.d/nginx reload',
+    }
+  }
+
+  $frontends.each | $frontend | {
+    $service = $frontend['service']
+    $port = $frontend['port']
+
+    consul_template::watch { "$service":
+      template      => 'profile/frontend.json.ctmpl.erb',
+      template_vars => {
+        'service' => "$service",
+        'port' => "$port",
+        'backends' => $backends,
       },
       destination   => "/etc/nginx/conf.d/${service}.conf",
       command       => '/etc/init.d/nginx reload',
