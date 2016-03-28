@@ -6,6 +6,7 @@ upstream <%= @template_vars['service'] %> {
 
 server {
   listen <%= @template_vars['port'] %>;
+  server_name <%= @template_vars['route'] %>.<%= @template_vars['domain'] %>;
 
   location / {
     proxy_pass http://<%= @template_vars['service'] %>;
