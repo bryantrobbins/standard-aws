@@ -925,7 +925,27 @@
                                     ]
                                 }
                             },
-                            "02_add_user_to_docker_group": {
+                            "02_upgrade_docker": {
+                                "command": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "yum install -y docker"
+                                        ]
+                                    ]
+                                }
+                            },
+                            "03_clean_stuff_up": {
+                                "command": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "rm /var/lib/docker/network/files/local-kv.db"
+                                        ]
+                                    ]
+                                }
+                            },
+                            "04_add_user_to_docker_group": {
                                 "command": {
                                     "Fn::Join": [
                                         "",
@@ -935,7 +955,7 @@
                                     ]
                                 }
                             },
-                            "03_restart_docker": {
+                            "05_restart_docker": {
                                 "command": {
                                     "Fn::Join": [
                                         "",
@@ -945,7 +965,7 @@
                                     ]
                                 }
                             },
-                            "04_pause_to_wait_for_docker_restart": {
+                            "06_pause_to_wait_for_docker_restart": {
                                 "command": {
                                     "Fn::Join": [
                                         "",
@@ -955,7 +975,7 @@
                                     ]
                                 }
                             },
-                            "05_start_ecs_if_not_running": {
+                            "07_start_ecs_if_not_running": {
                                 "command": {
                                     "Fn::Join": [
                                         "",
@@ -965,7 +985,7 @@
                                     ]
                                 }
                             },
-                            "06_pull_consul_image": {
+                            "08_pull_consul_image": {
                                 "command": {
                                     "Fn::Join": [
                                         "",
@@ -975,7 +995,7 @@
                                     ]
                                 }
                             },
-                            "07_pull_registrator_image": {
+                            "09_pull_registrator_image": {
                                 "command": {
                                     "Fn::Join": [
                                         "",
