@@ -413,6 +413,25 @@
                 }
               ]
             }
+          },
+          {
+            "PolicyName": "s3-put",
+            "PolicyDocument": {
+    					"Statement": [
+        				{
+            			"Sid": "Stmt1460933966000",
+            			"Effect": "Allow",
+            			"Action": [
+                		"s3:PutObject",
+                		"s3:PutObjectAcl",
+                		"s3:PutObjectVersionAcl"
+            			],
+            			"Resource": [
+                		"arn:aws:s3:::baseball-workbench/*"
+            			]
+        				}
+    					]
+						}
           }
         ]
       }
